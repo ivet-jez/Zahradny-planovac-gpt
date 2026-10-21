@@ -1,0 +1,422 @@
+
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f4e9">
+  <title>Záhradný Plánovač</title>
+  <style>
+    :root {
+      --green: #315c43;
+      --green-light: #e7eddf;
+      --cream: #f7f5ec;
+      --paper: #fffef9;
+      --text: #29372d;
+      --muted: #788174;
+      --line: #e5e6d9;
+      --orange: #d98a52;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 28px;
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo {
+      display: grid; place-items: center;
+      width: 44px; height: 44px; border-radius: 14px;
+      background: var(--green-light); font-size: 25px;
+    }
+    h1 { margin: 0; font-size: 20px; }
+    .subtitle { color: var(--muted); font-size: 12px; margin-top: 3px; }
+    .date { color: var(--muted); font-size: 13px; }
+    .layout { display: grid; grid-template-columns: 215px minmax(0,1fr); }
+    aside {
+      padding: 24px 14px;
+      border-right: 1px solid var(--line);
+      background: #f2f1e6;
+    }
+    .nav-label {
+      margin: 0 12px 12px;
+      font-size: 11px; letter-spacing: 1px;
+      color: var(--muted); text-transform: uppercase;
+    }
+    .nav {
+      display: flex; align-items: center; gap: 11px;
+      width: 100%; border: 0; border-radius: 10px;
+      padding: 12px; margin-bottom: 5px;
+      text-align: left; color: #566253; background: transparent;
+    }
+    .nav.active { background: var(--green); color: white; }
+    main { padding: 28px; min-width: 0; max-width: 1500px; width: 100%; }
+    .welcome { display: flex; justify-content: space-between; align-items: start; gap: 12px; margin-bottom: 22px; }
+    h2 { margin: 0 0 7px; font-size: 26px; font-weight: 650; }
+    p { margin: 0; }
+    .muted { color: var(--muted); font-size: 14px; }
+    .button {
+      border: 1px solid var(--line); border-radius: 10px;
+      background: var(--paper); color: var(--text);
+      padding: 10px 14px;
+    }
+    .button.primary { background: var(--green); border-color: var(--green); color: white; }
+    .stats { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; margin-bottom: 22px; }
+    .stat, .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; }
+    .stat { padding: 17px; }
+    .stat-label { color: var(--muted); font-size: 13px; }
+    .stat-number { font-size: 26px; font-weight: 650; margin-top: 8px; }
+    .content-grid { display: grid; grid-template-columns: minmax(0,1.65fr) minmax(230px,1fr); gap: 18px; align-items: start; }
+    .panel { padding: 19px; min-width: 0; }
+    .panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+    h3 { margin: 0; font-size: 17px; }
+    .garden {
+      padding: 16px; border-radius: 12px; background: #e8e6cf;
+      border: 1px solid #d8d7bd;
+    }
+    .garden-map {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 13px;
+      padding: 15px; background: #d6d2b1; border-radius: 10px;
+      background-image: radial-gradient(#b9b58e 1px, transparent 1px);
+      background-size: 12px 12px;
+    }
+    .bed {
+      min-height: 135px; padding: 12px; border-radius: 9px;
+      border: 5px solid #8c8d60; background: #65513a;
+      color: white; box-shadow: inset 0 0 0 2px #b7b18b;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .bed strong { font-size: 13px; text-shadow: 0 1px 2px #333; }
+    .plants { display: flex; flex-wrap: wrap; gap: 9px; font-size: 24px; }
+    .garden-bottom { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; font-size: 12px; color: #62634b; }
+    .plant-list { display: grid; gap: 10px; }
+    .plant {
+      display: flex; align-items: center; gap: 12px;
+      border: 1px solid var(--line); border-radius: 12px; padding: 11px;
+    }
+    .plant-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 11px; background: #edf0e3; font-size: 24px; }
+    .plant-info { flex: 1; min-width: 0; }
+    .plant-info strong { display: block; font-size: 14px; }
+    .plant-info span { color: var(--muted); font-size: 12px; }
+    .add-plant { border: 0; border-radius: 9px; background: var(--green-light); color: var(--green); padding: 8px 11px; font-weight: 650; }
+    .lower { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }
+    .task { display: flex; align-items: start; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+    .task:last-child { border-bottom: 0; }
+    .task input { accent-color: var(--green); margin-top: 4px; }
+    .task.done span { text-decoration: line-through; color: var(--muted); }
+    .small-button { border: 0; color: var(--green); background: transparent; font-weight: 600; }
+    .empty { color: var(--muted); font-size: 14px; padding: 12px 0; }
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+    .section-card { padding: 20px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; margin-top: 18px; }
+    .input-row { display: flex; gap: 8px; margin: 14px 0; }
+    .input-row input { min-width: 0; flex: 1; padding: 11px; border: 1px solid var(--line); border-radius: 9px; background: white; }
+    footer { padding: 20px; text-align: center; color: var(--muted); font-size: 12px; }
+    @media (max-width: 850px) {
+      .layout { grid-template-columns: 1fr; }
+      aside { padding: 10px; border-right: 0; border-bottom: 1px solid var(--line); overflow-x: auto; }
+      .nav-label { display: none; }
+      .nav-wrap { display: flex; gap: 5px; min-width: max-content; }
+      .nav { width: auto; margin: 0; padding: 10px; }
+      main { padding: 18px; }
+      .content-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 540px) {
+      header { padding: 14px; }
+      .date { display: none; }
+      main { padding: 14px; }
+      .welcome { flex-direction: column; }
+      h2 { font-size: 23px; }
+      .stats { gap: 8px; }
+      .stat { padding: 12px; }
+      .stat-number { font-size: 21px; }
+      .stat-label { font-size: 11px; }
+      .panel { padding: 13px; }
+      .garden { padding: 8px; }
+      .garden-map { padding: 8px; gap: 8px; }
+      .bed { min-height: 112px; padding: 8px; border-width: 3px; }
+      .plants { font-size: 19px; gap: 5px; }
+      .lower { grid-template-columns: 1fr; }
+      .garden-bottom { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="logo">🌱</div>
+      <div>
+        <h1>Záhradný Plánovač</h1>
+        <div class="subtitle">Moje miesto, moje pestovanie</div>
+      </div>
+    </div>
+    <div class="date" id="today"></div>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <p class="nav-label">Moja záhrada</p>
+      <nav class="nav-wrap" aria-label="Hlavná navigácia">
+        <button class="nav active" data-page="overview">🏡 Prehľad</button>
+        <button class="nav" data-page="garden">🗺️ Plán záhrady</button>
+        <button class="nav" data-page="planting">🌿 Výsadba</button>
+        <button class="nav" data-page="calendar">📅 Kalendár prác</button>
+        <button class="nav" data-page="catalog">📚 Katalóg rastlín</button>
+      </nav>
+    </aside>
+
+    <main>
+      <section class="page-section active" id="overview">
+        <div class="welcome">
+          <div>
+            <h2>Dobrý deň, záhradník! 🌿</h2>
+            <p class="muted">Každý kúsok zelene sa počíta. Tu je tvoja záhrada.</p>
+          </div>
+          <button class="button primary" id="addTaskTop">＋ Pridať úlohu</button>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><div class="stat-label">Záhony</div><div class="stat-number">4</div></div>
+          <div class="stat"><div class="stat-label">Druhy rastlín</div><div class="stat-number" id="plantCount">6</div></div>
+          <div class="stat"><div class="stat-label">Úlohy na dokončenie</div><div class="stat-number" id="taskCount">3</div></div>
+        </div>
+
+        <div class="content-grid">
+          <div class="panel">
+            <div class="panel-heading">
+              <h3>🗺️ Plán mojej záhrady</h3>
+              <button class="small-button" data-goto="garden">Otvoriť plán ↗</button>
+            </div>
+            <div class="garden">
+              <div class="garden-map">
+                <div class="bed"><strong>Záhon 1 · Listová zelenina</strong><div class="plants">🥬 🥬 🌱 🌱</div></div>
+                <div class="bed"><strong>Záhon 2 · Paradajky</strong><div class="plants">🍅 🍅 🌿 🍅</div></div>
+                <div class="bed"><strong>Záhon 3 · Koreňová</strong><div class="plants">🥕 🥕 🌿 🥕</div></div>
+                <div class="bed"><strong>Záhon 4 · Jahody</strong><div class="plants">🍓 🍓 🥬 🍓</div></div>
+              </div>
+              <div class="garden-bottom"><span>🌳 Ovocné stromy</span><span>🏡 Skleník</span><span>🪨 Chodníky</span></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-heading"><h3>🌱 Obľúbené rastliny</h3><button class="small-button" data-goto="catalog">Všetky ↗</button></div>
+            <div class="plant-list" id="favoritePlants">
+              <div class="plant"><div class="plant-icon">🍅</div><div class="plant-info"><strong>Paradajka</strong><span>Slnečné miesto</span></div><button class="add-plant" data-add="Paradajka">+</button></div>
+              <div class="plant"><div class="plant-icon">🥕</div><div class="plant-info"><strong>Mrkva</strong><span>Priama sejba</span></div><button class="add-plant" data-add="Mrkva">+</button></div>
+              <div class="plant"><div class="plant-icon">🍓</div><div class="plant-info"><strong>Jahoda</strong><span>Trvalka</span></div><button class="add-plant" data-add="Jahoda">+</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lower">
+          <div class="panel">
+            <div class="panel-heading"><h3>✓ Moje úlohy</h3><button class="small-button" id="addTask">＋ Pridať</button></div>
+            <div id="tasks"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-heading"><h3>🌼 Sezónna pripomienka</h3></div>
+            <p style="line-height:1.7;font-size:14px">Skontroluj stav pôdy a plán výsadby podľa aktuálneho počasia. Termíny sejby sa líšia podľa odrody a miestnych podmienok.</p>
+            <button class="button" style="margin-top:14px" data-goto="calendar">Pozrieť kalendár prác</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="page-section" id="garden">
+        <h2>Plán záhrady</h2>
+        <p class="muted">Zatiaľ orientačný nákres. V ďalších verziách pridáme vlastné rozmery a úpravu záhonov.</p>
+        <div class="section-card">
+          <div class="garden">
+            <div class="garden-map">
+              <div class="bed"><strong>Záhon 1 · Listová zelenina</strong><div class="plants">🥬 🥬 🌱 🌱</div></div>
+              <div class="bed"><strong>Záhon 2 · Paradajky</strong><div class="plants">🍅 🍅 🌿 🍅</div></div>
+              <div class="bed"><strong>Záhon 3 · Koreňová</strong><div class="plants">🥕 🥕 🌿 🥕</div></div>
+              <div class="bed"><strong>Záhon 4 · Jahody</strong><div class="plants">🍓 🍓 🥬 🍓</div></div>
+            </div>
+            <div class="garden-bottom"><span>🌳 Ovocné stromy</span><span>🏡 Skleník</span><span>🪨 Chodníky</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page-section" id="planting">
+        <h2>Plán výsadby</h2>
+        <p class="muted">Zapisuj si, čo chceš pestovať a kam to plánuješ vysadiť.</p>
+        <div class="section-card">
+          <h3>Pridať do plánu</h3>
+          <div class="input-row"><input id="plantInput" placeholder="Napr. cuketa, bazalka…"><button class="button primary" id="plantSubmit">Pridať</button></div>
+          <div id="plantPlan"><p class="empty">Zatiaľ tu nie sú žiadne vlastné záznamy.</p></div>
+        </div>
+      </section>
+
+      <section class="page-section" id="calendar">
+        <h2>Kalendár prác</h2>
+        <p class="muted">Jednoduchý zoznam úloh pre tvoju záhradu.</p>
+        <div class="section-card">
+          <div class="input-row"><input id="calendarInput" placeholder="Napr. zasiať šalát"><button class="button primary" id="calendarSubmit">Pridať úlohu</button></div>
+          <div id="calendarTasks"></div>
+        </div>
+      </section>
+
+      <section class="page-section" id="catalog">
+        <h2>Katalóg rastlín</h2>
+        <p class="muted">Vyber rastlinu a pridaj si ju do svojho plánu výsadby.</p>
+        <div class="section-card"><div class="plant-list" id="catalogPlants"></div></div>
+      </section>
+    </main>
+  </div>
+  <footer>Záhradný Plánovač · Prvá testovacia verzia</footer>
+</div>
+
+<script>
+  const $ = (selector) => document.querySelector(selector);
+  const today = new Date();
+  $('#today').textContent = today.toLocaleDateString('sk-SK', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  const catalog = [
+    {name:'Paradajka', icon:'🍅', note:'Teplo a slnko'},
+    {name:'Mrkva', icon:'🥕', note:'Priama sejba'},
+    {name:'Jahoda', icon:'🍓', note:'Slnečné miesto'},
+    {name:'Šalát', icon:'🥬', note:'Pravidelná zálievka'},
+    {name:'Bazalka', icon:'🌿', note:'Teplé, chránené miesto'},
+    {name:'Cuketa', icon:'🥒', note:'Potrebuje priestor'}
+  ];
+
+  let tasks = [
+    {text:'Skontrolovať vlhkosť pôdy', done:false},
+    {text:'Pripraviť si plán výsadby', done:false},
+    {text:'Skontrolovať záhradné náradie', done:true}
+  ];
+  let ownPlants = [];
+
+  function renderTasks() {
+    const html = tasks.map((task, i) => `
+      <label class="task ${task.done ? 'done' : ''}">
+        <input type="checkbox" data-task="${i}" ${task.done ? 'checked' : ''}>
+        <span>${escapeHtml(task.text)}</span>
+      </label>`).join('') || '<p class="empty">Zatiaľ nemáš žiadne úlohy.</p>';
+    $('#tasks').innerHTML = html;
+    $('#calendarTasks').innerHTML = html;
+    $('#taskCount').textContent = tasks.filter(t => !t.done).length;
+  }
+
+  function renderCatalog() {
+    $('#catalogPlants').innerHTML = catalog.map(p => `
+      <div class="plant">
+        <div class="plant-icon">${p.icon}</div>
+        <div class="plant-info"><strong>${p.name}</strong><span>${p.note}</span></div>
+        <button class="add-plant" data-add="${p.name}">Pridať</button>
+      </div>`).join('');
+    $('#plantCount').textContent = catalog.length + ownPlants.length;
+  }
+
+  function renderOwnPlants() {
+    $('#plantPlan').innerHTML = ownPlants.map((name, i) => `
+      <div class="task"><span style="flex:1">🌱 ${escapeHtml(name)}</span>
+      <button class="small-button" data-remove-plant="${i}">Odstrániť</button></div>
+    `).join('') || '<p class="empty">Zatiaľ tu nie sú žiadne vlastné záznamy.</p>';
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+    })[char]);
+  }
+
+  function addTaskFrom(input) {
+    const field = $(input);
+    const value = field.value.trim();
+    if (!value) { field.focus(); return; }
+    tasks.push({text:value, done:false});
+    field.value = '';
+    renderTasks();
+  }
+
+  function goTo(page) {
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav').forEach(b => b.classList.toggle('active', b.dataset.page === page));
+    const section = document.getElementById(page);
+    if (section) section.classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  document.addEventListener('click', event => {
+    const nav = event.target.closest('[data-page]');
+    if (nav) goTo(nav.dataset.page);
+
+    const goto = event.target.closest('[data-goto]');
+    if (goto) goTo(goto.dataset.goto);
+
+    const add = event.target.closest('[data-add]');
+    if (add) {
+      const name = add.dataset.add;
+      if (!ownPlants.includes(name)) ownPlants.push(name);
+      renderOwnPlants();
+      $('#plantCount').textContent = catalog.length + ownPlants.length;
+      add.textContent = '✓';
+      setTimeout(() => add.textContent = add.dataset.add === name ? '+' : 'Pridať', 900);
+    }
+
+    const remove = event.target.closest('[data-remove-plant]');
+    if (remove) {
+      ownPlants.splice(Number(remove.dataset.removePlant), 1);
+      renderOwnPlants();
+      $('#plantCount').textContent = catalog.length + ownPlants.length;
+    }
+  });
+
+  document.addEventListener('change', event => {
+    if (event.target.matches('[data-task]')) {
+      tasks[Number(event.target.dataset.task)].done = event.target.checked;
+      renderTasks();
+    }
+  });
+
+  $('#addTask').addEventListener('click', () => {
+    const text = prompt('Akú úlohu chceš pridať?');
+    if (text && text.trim()) {
+      tasks.push({text:text.trim(), done:false});
+      renderTasks();
+    }
+  });
+  $('#addTaskTop').addEventListener('click', () => {
+    goTo('calendar');
+    $('#calendarInput').focus();
+  });
+  $('#plantSubmit').addEventListener('click', () => {
+    const field = $('#plantInput');
+    const value = field.value.trim();
+    if (!value) { field.focus(); return; }
+    if (!ownPlants.includes(value)) ownPlants.push(value);
+    field.value = '';
+    renderOwnPlants();
+    $('#plantCount').textContent = catalog.length + ownPlants.length;
+  });
+  $('#calendarSubmit').addEventListener('click', () => addTaskFrom('#calendarInput'));
+  $('#calendarInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addTaskFrom('#calendarInput');
+  });
+  $('#plantInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') $('#plantSubmit').click();
+  });
+
+  renderTasks();
+  renderCatalog();
+  renderOwnPlants();
+</script>
+</body>
+</html>
