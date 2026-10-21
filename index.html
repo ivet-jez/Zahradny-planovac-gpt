@@ -138,7 +138,8 @@
     #gardenCanvas .hit-area { stroke:transparent; stroke-width:18; fill:none; cursor:pointer; }
     #gardenCanvas .endpoint { fill:#fffef9; stroke:#315c43; stroke-width:3; cursor:grab; }
     #gardenCanvas .endpoint:active { cursor:grabbing; }
-    #gardenCanvas .preview-line { stroke:#d98a52; stroke-width:3; stroke-dasharray:8 6; fill:none; }
+    #gardenCanvas .preview-line { stroke:#d98a52; stroke-width:3; stroke-dasharray:8 6; fill:none; pointer-events:none; }
+    #drawingPreview { pointer-events:none; }
     #gardenCanvas .dimension { font-size:16px; font-weight:650; fill:#29372d; paint-order:stroke; stroke:#fffef9; stroke-width:5px; stroke-linejoin:round; text-anchor:middle; }
     #gardenCanvas .start-point { fill:#d98a52; stroke:white; stroke-width:3; cursor:pointer; }
     .garden-editor-footer { display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; color:var(--muted); font-size:12px; padding-top:12px; }
@@ -264,7 +265,7 @@
             <button class="button" id="clearGarden">Vymazať celý pôdorys</button>
             <label class="snap-toggle"><input type="checkbox" id="snapToggle" checked> Inteligentné prichytávanie</label>
           </div>
-          <div class="editor-help" id="drawingStatus" role="status">Klikni na „Kresliť obrys“ a potom na plochu.</div>
+          <div class="editor-help" id="drawingStatus" role="status">Klikni na „Kresliť obrys“, potom klikni na plochu a pohybuj myšou. Ďalším kliknutím dokončíš čiaru.</div>
           <div class="drawing-wrap">
             <svg id="gardenCanvas" viewBox="0 0 1000 650" role="img" aria-label="Mriežka na kreslenie pôdorysu záhrady">
               <defs>
@@ -388,7 +389,9 @@
     if (!value) { field.focus(); return; }
     tasks.push({text:value, done:false});
     field.value = '';
-  
+    renderTasks();
+  }
+
   // Kresliaci editor: 1 SVG jednotka = 2 cm, jeden štvorček = 50 cm.
   const canvas = $('#gardenCanvas');
   const linesLayer = $('#gardenLines');
@@ -511,7 +514,7 @@
   $('#drawStart').addEventListener('click',()=>{
     drawing=true;
     if (!drawingStart) drawingStart=gardenSegments.length ? {...gardenSegments[gardenSegments.length-1].b} : null;
-    statusEl.textContent='Klikni na plochu, aby si určil/a začiatok, potom klikni na koncový bod čiary. Esc ukončí kreslenie.';
+    statusEl.textContent='Klikni na plochu, aby si určil/a začiatok čiary. Pohybom myši nastavíš jej smer a dĺžku; ďalším kliknutím ju dokončíš. Esc ukončí kreslenie.';
     renderGarden();
   });
   $('#finishDrawing').addEventListener('click',finishDrawing);
@@ -561,7 +564,7 @@
     gardenSegments.push({a:{...drawingStart},b:{...p},closed:false});
     drawingStart={...p}; selectedSegment=gardenSegments.length-1;
     saveGarden(); renderGarden();
-    statusEl.textContent='Čiara je hotová. Klikni na ďalší koncový bod; kreslenie pokračuje z posledného bodu. Esc ukončí kreslenie.';
+    statusEl.textContent='Čiara je hotová. Pohybuj myšou a ďalším kliknutím dokonči nasledujúcu čiaru z tohto bodu. Esc ukončí kreslenie.';
   });
   document.addEventListener('keydown',event=>{if(event.key==='Escape' && drawing) finishDrawing();});
   $('#applyLength').addEventListener('click',()=>{
@@ -582,7 +585,6 @@
   loadGarden();
 
   renderTasks();
-  }
 
   function goTo(page) {
     document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
