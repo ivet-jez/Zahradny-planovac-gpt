@@ -125,7 +125,31 @@
     .input-row { display: flex; gap: 8px; margin: 14px 0; }
     .input-row input { min-width: 0; flex: 1; padding: 11px; border: 1px solid var(--line); border-radius: 9px; background: white; }
     footer { padding: 20px; text-align: center; color: var(--muted); font-size: 12px; }
-    @media (max-width: 850px) {
+
+
+    .editor-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:9px; margin-bottom:12px; }
+    .snap-toggle { display:flex; align-items:center; gap:7px; font-size:13px; color:var(--text); padding:8px 3px; }
+    .snap-toggle input { accent-color:var(--green); }
+    .editor-help { font-size:13px; color:var(--muted); margin:8px 0 12px; min-height:20px; }
+    .drawing-wrap { width:100%; overflow:auto; border:1px solid #d9ddcf; border-radius:10px; background:#fffef9; touch-action:pan-y; }
+    #gardenCanvas { display:block; width:100%; min-width:620px; height:auto; cursor:crosshair; }
+    #gardenCanvas .garden-segment { stroke:#315c43; stroke-width:4; stroke-linecap:round; fill:none; cursor:pointer; }
+    #gardenCanvas .garden-segment.selected { stroke:#d98a52; stroke-width:5; }
+    #gardenCanvas .hit-area { stroke:transparent; stroke-width:18; fill:none; cursor:pointer; }
+    #gardenCanvas .endpoint { fill:#fffef9; stroke:#315c43; stroke-width:3; cursor:grab; }
+    #gardenCanvas .endpoint:active { cursor:grabbing; }
+    #gardenCanvas .preview-line { stroke:#d98a52; stroke-width:3; stroke-dasharray:8 6; fill:none; }
+    #gardenCanvas .dimension { font-size:16px; font-weight:650; fill:#29372d; paint-order:stroke; stroke:#fffef9; stroke-width:5px; stroke-linejoin:round; text-anchor:middle; }
+    #gardenCanvas .start-point { fill:#d98a52; stroke:white; stroke-width:3; cursor:pointer; }
+    .garden-editor-footer { display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; color:var(--muted); font-size:12px; padding-top:12px; }
+    .line-tools { position:sticky; bottom:12px; z-index:2; margin:16px auto 0; max-width:650px; padding:16px; border:1px solid var(--line); border-radius:14px; background:#fffef9; box-shadow:0 8px 25px #29372d18; }
+    .line-tools[hidden] { display:none; }
+    .line-tools > strong { display:block; margin-bottom:12px; }
+    .line-tools label { display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
+    .line-tools-row { display:flex; flex-wrap:wrap; gap:8px; }
+    .line-tools-row input { width:130px; min-width:0; padding:10px; border:1px solid var(--line); border-radius:9px; }
+    @media (max-width:540px) { .line-tools-row input { width:100%; } .line-tools-row button { flex:1; } }
+\n    @media (max-width: 850px) {
       .layout { grid-template-columns: 1fr; }
       aside { padding: 10px; border-right: 0; border-bottom: 1px solid var(--line); overflow-x: auto; }
       .nav-label { display: none; }
@@ -201,14 +225,9 @@
               <h3>🗺️ Plán mojej záhrady</h3>
               <button class="small-button" data-goto="garden">Otvoriť plán ↗</button>
             </div>
-            <div class="garden">
-              <div class="garden-map">
-                <div class="bed"><strong>Záhon 1 · Listová zelenina</strong><div class="plants">🥬 🥬 🌱 🌱</div></div>
-                <div class="bed"><strong>Záhon 2 · Paradajky</strong><div class="plants">🍅 🍅 🌿 🍅</div></div>
-                <div class="bed"><strong>Záhon 3 · Koreňová</strong><div class="plants">🥕 🥕 🌿 🥕</div></div>
-                <div class="bed"><strong>Záhon 4 · Jahody</strong><div class="plants">🍓 🍓 🥬 🍓</div></div>
-              </div>
-              <div class="garden-bottom"><span>🌳 Ovocné stromy</span><span>🏡 Skleník</span><span>🪨 Chodníky</span></div>
+            <div class="garden" style="padding:22px">
+              <p style="font-size:15px;line-height:1.7">Najskôr si nakresli skutočný tvar svojej záhrady a zadaj jej rozmery. Potom môžeme do pôdorysu dopĺňať záhony, rastliny, skleník aj chodníky.</p>
+              <button class="button primary" style="margin-top:14px" data-goto="garden">Nakresliť moju záhradu ↗</button>
             </div>
           </div>
 
@@ -237,16 +256,42 @@
 
       <section class="page-section" id="garden">
         <h2>Plán záhrady</h2>
-        <p class="muted">Zatiaľ orientačný nákres. V ďalších verziách pridáme vlastné rozmery a úpravu záhonov.</p>
-        <div class="section-card">
-          <div class="garden">
-            <div class="garden-map">
-              <div class="bed"><strong>Záhon 1 · Listová zelenina</strong><div class="plants">🥬 🥬 🌱 🌱</div></div>
-              <div class="bed"><strong>Záhon 2 · Paradajky</strong><div class="plants">🍅 🍅 🌿 🍅</div></div>
-              <div class="bed"><strong>Záhon 3 · Koreňová</strong><div class="plants">🥕 🥕 🌿 🥕</div></div>
-              <div class="bed"><strong>Záhon 4 · Jahody</strong><div class="plants">🍓 🍓 🥬 🍓</div></div>
+        <p class="muted">Klikni na plochu a začni kresliť obrys svojej záhrady. Jeden štvorček predstavuje 50 cm. Počas kreslenia stlač Esc, ak chceš ukončiť kreslenie.</p>
+        <div class="section-card garden-editor">
+          <div class="editor-toolbar">
+            <button class="button primary" id="drawStart">✏️ Kresliť obrys</button>
+            <button class="button" id="finishDrawing">Ukončiť čiaru (Esc)</button>
+            <button class="button" id="clearGarden">Vymazať celý pôdorys</button>
+            <label class="snap-toggle"><input type="checkbox" id="snapToggle" checked> Inteligentné prichytávanie</label>
+          </div>
+          <div class="editor-help" id="drawingStatus" role="status">Klikni na „Kresliť obrys“ a potom na plochu.</div>
+          <div class="drawing-wrap">
+            <svg id="gardenCanvas" viewBox="0 0 1000 650" role="img" aria-label="Mriežka na kreslenie pôdorysu záhrady">
+              <defs>
+                <pattern id="smallGrid" width="25" height="25" patternUnits="userSpaceOnUse">
+                  <path d="M 25 0 L 0 0 0 25" fill="none" stroke="#d9ddcf" stroke-width="1"/>
+                </pattern>
+                <pattern id="largeGrid" width="100" height="100" patternUnits="userSpaceOnUse">
+                  <rect width="100" height="100" fill="url(#smallGrid)"/>
+                  <path d="M 100 0 L 0 0 0 100" fill="none" stroke="#b8c2ad" stroke-width="1.4"/>
+                </pattern>
+              </defs>
+              <rect width="1000" height="650" fill="#fffef9"/>
+              <rect width="1000" height="650" fill="url(#largeGrid)"/>
+              <g id="gardenLines"></g>
+              <g id="drawingPreview"></g>
+            </svg>
+          </div>
+          <div class="garden-editor-footer"><span>📏 1 štvorček = 50 cm</span><span id="gardenSummary">Zatiaľ bez nakreslených čiar.</span></div>
+          <div class="line-tools" id="lineTools" hidden>
+            <strong>Upraviť vybranú čiaru</strong>
+            <label for="lineLength">Dĺžka (cm)</label>
+            <div class="line-tools-row">
+              <input type="number" id="lineLength" min="1" step="10" inputmode="numeric">
+              <button class="button primary" id="applyLength">Použiť dĺžku</button>
+              <button class="button" id="deleteLine">Zmazať čiaru</button>
             </div>
-            <div class="garden-bottom"><span>🌳 Ovocné stromy</span><span>🏡 Skleník</span><span>🪨 Chodníky</span></div>
+            <p class="muted">Dĺžku môžeš meniť aj potiahnutím bieleho kolieska na konci čiary.</p>
           </div>
         </div>
       </section>
@@ -343,7 +388,200 @@
     if (!value) { field.focus(); return; }
     tasks.push({text:value, done:false});
     field.value = '';
-    renderTasks();
+  
+  // Kresliaci editor: 1 SVG jednotka = 2 cm, jeden štvorček = 50 cm.
+  const canvas = $('#gardenCanvas');
+  const linesLayer = $('#gardenLines');
+  const previewLayer = $('#drawingPreview');
+  const statusEl = $('#drawingStatus');
+  const summaryEl = $('#gardenSummary');
+  const toolsPanel = $('#lineTools');
+  const lengthInput = $('#lineLength');
+  const snapToggle = $('#snapToggle');
+  let gardenSegments = [];
+  let selectedSegment = null;
+  let drawing = false;
+  let drawingStart = null;
+  let previewPoint = null;
+  let dragPoint = null;
+  let suppressClick = false;
+  const GRID = 25;
+  const CM_PER_UNIT = 2;
+  const FIRST_POINT = {x:120, y:120};
+
+  function loadGarden() {
+    try {
+      const saved = localStorage.getItem('zahradnyPlanovacPovodorys');
+      if (saved) gardenSegments = JSON.parse(saved);
+    } catch (err) { gardenSegments = []; }
+    renderGarden();
+  }
+  function saveGarden() {
+    try { localStorage.setItem('zahradnyPlanovacPovodorys', JSON.stringify(gardenSegments)); } catch (err) {}
+  }
+  function dist(a,b) { return Math.hypot(b.x-a.x,b.y-a.y); }
+  function cmLength(seg) { return Math.round(dist(seg.a,seg.b) * CM_PER_UNIT); }
+  function fmtCm(cm) { return cm >= 100 ? (cm/100).toLocaleString('sk-SK',{maximumFractionDigits:2})+' m' : cm+' cm'; }
+  function escSvg(n) { return Number(n.toFixed(2)); }
+  function pointFromEvent(event) {
+    const p = canvas.createSVGPoint();
+    p.x = event.clientX; p.y = event.clientY;
+    const m = canvas.getScreenCTM();
+    if (!m) return {x:0,y:0};
+    const q = p.matrixTransform(m.inverse());
+    return {x:Math.max(0,Math.min(1000,q.x)), y:Math.max(0,Math.min(650,q.y))};
+  }
+  function nearestPointOnSegment(p,a,b) {
+    const dx=b.x-a.x, dy=b.y-a.y, len=dx*dx+dy*dy;
+    if (!len) return {...a};
+    const t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/len));
+    return {x:a.x+t*dx,y:a.y+t*dy};
+  }
+  function snapPoint(raw, origin) {
+    if (!snapToggle.checked) return raw;
+    let p = {x:Math.round(raw.x/GRID)*GRID, y:Math.round(raw.y/GRID)*GRID};
+    if (origin) {
+      const dx=raw.x-origin.x, dy=raw.y-origin.y, length=Math.hypot(dx,dy);
+      if (length > 0) {
+        const angle=Math.atan2(dy,dx), step=Math.PI/12;
+        const snappedAngle=Math.round(angle/step)*step;
+        const anglePoint={x:origin.x+Math.cos(snappedAngle)*length,y:origin.y+Math.sin(snappedAngle)*length};
+        if (dist(raw,anglePoint)<10) p=anglePoint;
+      }
+    }
+    // Snap near an existing endpoint, closing point, or aligned edge.
+    const candidates=[];
+    gardenSegments.forEach(seg=>{candidates.push(seg.a,seg.b);});
+    if (gardenSegments.length) candidates.push(gardenSegments[0].a);
+    let best=null, bestD=16;
+    candidates.forEach(c=>{const d=dist(raw,c);if(d<bestD){best=c;bestD=d;}});
+    if (best) p={...best};
+    gardenSegments.forEach(seg=>{
+      if (Math.abs(raw.y-seg.a.y)<9) p.y=seg.a.y;
+      if (Math.abs(raw.y-seg.b.y)<9) p.y=seg.b.y;
+      if (Math.abs(raw.x-seg.a.x)<9) p.x=seg.a.x;
+      if (Math.abs(raw.x-seg.b.x)<9) p.x=seg.b.x;
+    });
+    p.x=Math.max(0,Math.min(1000,p.x)); p.y=Math.max(0,Math.min(650,p.y));
+    return p;
+  }
+  function svgEl(tag, attrs={}, text='') {
+    const el=document.createElementNS('http://www.w3.org/2000/svg',tag);
+    Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));
+    if (text) el.textContent=text;
+    return el;
+  }
+  function renderGarden() {
+    linesLayer.innerHTML='';
+    gardenSegments.forEach((seg,i)=>{
+      const g=svgEl('g',{'data-segment':i});
+      const path=`M ${escSvg(seg.a.x)} ${escSvg(seg.a.y)} L ${escSvg(seg.b.x)} ${escSvg(seg.b.y)}`;
+      g.appendChild(svgEl('path',{d:path,class:'hit-area','data-line':i}));
+      g.appendChild(svgEl('path',{d:path,class:'garden-segment'+(selectedSegment===i?' selected':''),'data-line':i}));
+      const mid={x:(seg.a.x+seg.b.x)/2,y:(seg.a.y+seg.b.y)/2};
+      const angle=Math.atan2(seg.b.y-seg.a.y,seg.b.x-seg.a.x);
+      const normal={x:-Math.sin(angle)*17,y:Math.cos(angle)*17};
+      g.appendChild(svgEl('text',{x:mid.x+normal.x,y:mid.y+normal.y,class:'dimension','data-line':i},fmtCm(cmLength(seg))));
+      if (selectedSegment===i) {
+        g.appendChild(svgEl('circle',{cx:seg.a.x,cy:seg.a.y,r:7,class:'endpoint','data-handle':i+':a'}));
+        g.appendChild(svgEl('circle',{cx:seg.b.x,cy:seg.b.y,r:7,class:'endpoint','data-handle':i+':b'}));
+      }
+      linesLayer.appendChild(g);
+    });
+    if (drawingStart) previewLayer.appendChild(svgEl('circle',{cx:drawingStart.x,cy:drawingStart.y,r:6,class:'start-point'}));
+    summaryEl.textContent=gardenSegments.length ? `${gardenSegments.length} čiar · ${gardenSegments.filter(s=>s.closed).length ? 'pôdorys uzavretý' : 'pôdorys môže pokračovať'}` : 'Zatiaľ bez nakreslených čiar.';
+    if (selectedSegment!==null && gardenSegments[selectedSegment]) {
+      toolsPanel.hidden=false; lengthInput.value=cmLength(gardenSegments[selectedSegment]);
+    } else { toolsPanel.hidden=true; }
+    previewLayer.querySelectorAll('.preview-line,.dimension').forEach(el=>el.remove());
+  }
+  function updatePreview(raw) {
+    previewLayer.innerHTML='';
+    if (!drawing || !drawingStart || !raw) return;
+    const p=snapPoint(raw,drawingStart);
+    previewLayer.appendChild(svgEl('path',{d:`M ${drawingStart.x} ${drawingStart.y} L ${p.x} ${p.y}`,class:'preview-line'}));
+    const mid={x:(drawingStart.x+p.x)/2,y:(drawingStart.y+p.y)/2};
+    previewLayer.appendChild(svgEl('text',{x:mid.x,y:mid.y-12,class:'dimension'},fmtCm(Math.round(dist(drawingStart,p)*CM_PER_UNIT))));
+  }
+  function finishDrawing() {
+    drawing=false; drawingStart=null; previewPoint=null; previewLayer.innerHTML='';
+    statusEl.textContent='Kreslenie čiary je ukončené. Môžeš vybrať čiaru na úpravu alebo pokračovať tlačidlom „Kresliť obrys“.';
+    renderGarden();
+  }
+  $('#drawStart').addEventListener('click',()=>{
+    drawing=true;
+    if (!drawingStart) drawingStart=gardenSegments.length ? {...gardenSegments[gardenSegments.length-1].b} : null;
+    statusEl.textContent='Klikni na plochu, aby si určil/a začiatok, potom klikni na koncový bod čiary. Esc ukončí kreslenie.';
+    renderGarden();
+  });
+  $('#finishDrawing').addEventListener('click',finishDrawing);
+  $('#clearGarden').addEventListener('click',()=>{
+    if (!confirm('Naozaj chceš vymazať celý nakreslený pôdorys?')) return;
+    gardenSegments=[];selectedSegment=null;drawing=false;drawingStart=null;previewLayer.innerHTML='';saveGarden();renderGarden();
+    statusEl.textContent='Pôdorys je prázdny. Klikni na „Kresliť obrys“ a začni kresliť.';
+  });
+  canvas.addEventListener('pointermove',event=>{
+    const raw=pointFromEvent(event);
+    if (dragPoint) {
+      const seg=gardenSegments[dragPoint.index];
+      const p=snapPoint(raw,null);
+      seg[dragPoint.end]=p;
+      if (dragPoint.end==='a' && dragPoint.index>0) gardenSegments[dragPoint.index-1].b={...p};
+      if (dragPoint.end==='b' && dragPoint.index<gardenSegments.length-1) gardenSegments[dragPoint.index+1].a={...p};
+      renderGarden(); updatePreview(raw); return;
+    }
+    if (drawing && drawingStart) updatePreview(raw);
+  });
+  canvas.addEventListener('pointerdown',event=>{
+    const handle=event.target.closest('[data-handle]');
+    if (handle) {
+      const [idx,end]=handle.getAttribute('data-handle').split(':');
+      dragPoint={index:Number(idx),end}; selectedSegment=Number(idx); canvas.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    }
+  });
+  canvas.addEventListener('pointerup',()=>{
+    if (dragPoint) { dragPoint=null; suppressClick=true; saveGarden(); renderGarden(); }
+  });
+  canvas.addEventListener('click',event=>{
+    if (suppressClick) { suppressClick=false; return; }
+    const raw=pointFromEvent(event);
+    const lineEl=event.target.closest('[data-line]');
+    if (lineEl && !drawing) {
+      selectedSegment=Number(lineEl.getAttribute('data-line'));renderGarden();return;
+    }
+    if (!drawing) { selectedSegment=null;renderGarden();return; }
+    const p=snapPoint(raw,drawingStart);
+    if (!drawingStart) { drawingStart=p; renderGarden(); return; }
+    if (gardenSegments.length && dist(p,FIRST_POINT)<14 && dist(drawingStart,FIRST_POINT)>14) {
+      gardenSegments.push({a:{...drawingStart},b:{...FIRST_POINT},closed:true});
+      saveGarden(); finishDrawing(); statusEl.textContent='Pôdorys záhrady je uzavretý.'; return;
+    }
+    if (dist(p,drawingStart)<3) return;
+    gardenSegments.push({a:{...drawingStart},b:{...p},closed:false});
+    drawingStart={...p}; selectedSegment=gardenSegments.length-1;
+    saveGarden(); renderGarden();
+    statusEl.textContent='Čiara je hotová. Klikni na ďalší koncový bod; kreslenie pokračuje z posledného bodu. Esc ukončí kreslenie.';
+  });
+  document.addEventListener('keydown',event=>{if(event.key==='Escape' && drawing) finishDrawing();});
+  $('#applyLength').addEventListener('click',()=>{
+    if(selectedSegment===null || !gardenSegments[selectedSegment]) return;
+    const cm=Number(lengthInput.value);
+    if(!Number.isFinite(cm)||cm<=0){alert('Zadaj dĺžku väčšiu ako 0 cm.');return;}
+    const seg=gardenSegments[selectedSegment], dx=seg.b.x-seg.a.x,dy=seg.b.y-seg.a.y,len=Math.hypot(dx,dy)||1;
+    const scale=(cm/CM_PER_UNIT)/len;
+    seg.b={x:Math.max(0,Math.min(1000,seg.a.x+dx*scale)),y:Math.max(0,Math.min(650,seg.a.y+dy*scale))};
+    if(selectedSegment<gardenSegments.length-1) gardenSegments[selectedSegment+1].a={...seg.b};
+    saveGarden();renderGarden();
+  });
+  $('#deleteLine').addEventListener('click',()=>{
+    if(selectedSegment===null)return;
+    gardenSegments.splice(selectedSegment,1);selectedSegment=null;saveGarden();renderGarden();
+    statusEl.textContent='Čiara bola zmazaná.';
+  });
+  loadGarden();
+
+  renderTasks();
   }
 
   function goTo(page) {
